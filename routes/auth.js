@@ -16,6 +16,7 @@ router.post("/login", async (req, res) => {
       const token = jwt.sign(
         {
           _id: user._id,
+          handle: user.handle,
           username: user.username,
           followers: user.followers,
           followings: user.followings,
@@ -39,14 +40,19 @@ router.post("/signup", async (req, res) => {
     if (!valid) {
       res.send({ error });
     }
-    const hashPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({
-      username: username,
-      handle: handle,
-      password: hashPassword,
-    });
-    const user = await newUser.save();
-    res.send(user._id);
+    const alreadyUser = await User.findOne({ handle: req.body.handle });
+    if (!alreadyUser) {
+      const hashPassword = await bcrypt.hash(password, 10);
+      const newUser = new User({
+        username: username,
+        handle: handle,
+        password: hashPassword,
+      });
+      const user = await newUser.save();
+      res.send(user._id);
+    } else {
+      res.send({ error: { handle: "Already exists" } });
+    }
   } catch (err) {
     res.status(500).send(err);
   }

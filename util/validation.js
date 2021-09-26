@@ -1,10 +1,5 @@
 const User = require("../models/User");
 
-const isUserExist = async (handle) => {
-  const user = await User.findOne({ handle });
-  if (user) return true;
-};
-
 const isValid = (username, password, handle) => {
   //username validation
   if (username.length < 3) {
@@ -31,9 +26,6 @@ const isValid = (username, password, handle) => {
     }
   }
   //handle validation
-  if (isUserExist(handle)) {
-    return { valid: false, error: { handle: "Already exist" } };
-  }
   if (handle.length < 3) {
     return { valid: false, error: { handle: "Atleast 3 character" } };
   }
