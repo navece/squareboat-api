@@ -1,10 +1,11 @@
 const router = require("express").Router();
 const Post = require("../models/Post");
 const User = require("../models/User");
+const authMiddleware = require("../middleware/authMiddleware");
 
 //TODO: get timeline
 
-router.get("/timeline/:id", async (req, res) => {
+router.get("/timeline/:id", authMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     const userPosts = await Post.find({ userId: user._id });
@@ -21,7 +22,7 @@ router.get("/timeline/:id", async (req, res) => {
 
 //TODO: create a post
 
-router.post("/", async (req, res) => {
+router.post("/", authMiddleware, async (req, res) => {
   const newPost = new Post({
     userId: req.body.userId,
     content: req.body.content,
@@ -36,7 +37,7 @@ router.post("/", async (req, res) => {
 
 //TODO: get a post
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", authMiddleware, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
     res.send(post);
@@ -47,7 +48,7 @@ router.get("/:id", async (req, res) => {
 
 //TODO: update a post
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", authMiddleware, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
     if (post.userId === req.body.userId) {
@@ -63,7 +64,7 @@ router.put("/:id", async (req, res) => {
 
 //TODO: delete a post
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authMiddleware, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
     if (post.userId === req.body.userId) {

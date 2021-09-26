@@ -1,8 +1,9 @@
 const router = require("express").Router();
 const User = require("../models/User");
+const authMiddleware = require("../middleware/authMiddleware");
 
 // TODO: get all user
-router.get("/all", async (req, res) => {
+router.get("/all", authMiddleware, async (req, res) => {
   try {
     let users = await User.find();
     for (let i = 0; i < users.length; i++) {
@@ -22,7 +23,7 @@ router.get("/all", async (req, res) => {
 
 //TODO: get a user
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", authMiddleware, async (req, res) => {
   try {
     let user = await User.findById(req.params.id);
     res.send(user);
@@ -32,7 +33,7 @@ router.get("/:id", async (req, res) => {
 });
 
 //TODO: follow
-router.put("/:id/follow", async (req, res) => {
+router.put("/:id/follow", authMiddleware, async (req, res) => {
   //userId is my id
   // id is id of which i want to follow
   if (req.body.userId === req.params.id) {
@@ -54,7 +55,7 @@ router.put("/:id/follow", async (req, res) => {
   }
 });
 //TODO: unfollow
-router.put("/:id/unfollow", async (req, res) => {
+router.put("/:id/unfollow", authMiddleware, async (req, res) => {
   //userId is my id
   // id is id of which i want to follow
   if (req.body.userId === req.params.id) {

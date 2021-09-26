@@ -1,16 +1,32 @@
 const router = require("express").Router();
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
+var jwt = require("jsonwebtoken");
+const { isValid } = require("../util/validation");
 
 router.post("/login", async (req, res) => {
   try {
     const user = await User.findOne({ handle: req.body.handle });
-    if (!user) res.status(404).send("User not found");
+    if (!user) res.status(404).send({ error: { handle: "User not found" } });
     const isvalidPassword = await bcrypt.compare(
       req.body.password,
       user.password
     );
-    isvalidPassword ? res.send(user) : res.status(400).send("Wrong password");
+    if (isvalidPassword) {
+      const token = jwt.sign(
+        {
+          _id: user._id,
+          username: user.username,
+          followers: user.followers,
+          followings: user.followings,
+        },
+        process.env.SECRET_KEY,
+        { expiresIn: "12h" }
+      );
+      res.send(token);
+    } else {
+      res.status(400).send({ error: { password: "Wrong password" } });
+    }
   } catch (err) {
     res.status(500).send(err);
   }
@@ -18,14 +34,19 @@ router.post("/login", async (req, res) => {
 
 router.post("/signup", async (req, res) => {
   try {
-    const hashPassword = await bcrypt.hash(req.body.password, 10);
+    const { username, password, handle } = req.body;
+    const { valid, error } = isValid(username, password, handle);
+    if (!valid) {
+      res.send({ error });
+    }
+    const hashPassword = await bcrypt.hash(password, 10);
     const newUser = new User({
-      username: req.body.username,
-      handle: req.body.handle,
+      username: username,
+      handle: handle,
       password: hashPassword,
     });
     const user = await newUser.save();
-    res.send(user);
+    res.send(user._id);
   } catch (err) {
     res.status(500).send(err);
   }
