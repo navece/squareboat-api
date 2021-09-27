@@ -64,10 +64,10 @@ router.put("/:id", authMiddleware, async (req, res) => {
 
 //TODO: delete a post
 
-router.delete("/:id", authMiddleware, async (req, res) => {
+router.delete("/:userId/:postId", authMiddleware, async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id);
-    if (post.userId === req.body.userId) {
+    const post = await Post.findById(req.params.postId);
+    if (post.userId === req.params.userId) {
       await post.deleteOne();
       res.send("post has been deleted");
     } else {
